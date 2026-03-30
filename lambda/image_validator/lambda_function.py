@@ -40,7 +40,24 @@ def lambda_handler(event, context):
     """
 
     print("=== image validator invoked ===")
+    for record in event['Records']:
+        sns_message = json.loads(record['Sns']['Message'])
 
+        for s3_record in sns_message['Records']:
+            bucket = s3_record['s3']['bucket']['name']
+            key = s3_record['s3']['object']['key']
+
+            if is_valid_image(key):
+                print(f"[VALID] {key} is a valid image file")
+                filename = key.split('/')[-1]
+                s3.copy_object(
+                    Bucket=bucket,
+                    Key=f"processed/valid/{filename}",
+                    CopySource={'Bucket': bucket, 'Key': key}
+                )
+            else:
+                print(f"[INVALID] {key} is not a valid image type")
+                raise ValueError(f"{key} is not a valid image type")
     # todo: loop through event['Records']
     # todo: for each record, get the SNS message string from record['Sns']['Message']
     # todo: parse the SNS message string as JSON to get the S3 event

@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: us-east-1  # update if you are in a different region
-  AWS_LAMBDA_ROLE_ARN: arn:aws:iam::123456789012:role/lambda-image-processing-role  # replace with your ARN
+  AWS_LAMBDA_ROLE_ARN: arn:aws:iam::807737159780:role/lambda-image-processing-role  # replace with your ARN
 
 jobs:
   deploy-metadata-extractor:
@@ -45,7 +45,16 @@ jobs:
           #  TODO: implement build and push to ECR
           #
           ######
-          exit 1
+          # Build Docker image
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+
+          # Tag image for ECR
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          # Push image to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
 
       - name: Check if Lambda function exists
         id: check-lambda-metadata-extractor
@@ -117,7 +126,16 @@ jobs:
           #  TODO: implement build and push to ECR
           #
           ######
-          exit 1
+          # Build Docker image
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+
+          # Tag image for ECR
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG \
+          $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          # Push image to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
 
       - name: Check if Lambda function exists
         id: check-lambda-image-validator
